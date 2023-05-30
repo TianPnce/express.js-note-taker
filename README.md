@@ -28,6 +28,7 @@ THEN I am presented with empty fields to enter a new note title and the note’s
 ```
 
 ## Deployment
+[Express.js Note Taker](https://expressjs-note-taker25.herokuapp.com/)
 
 ## Technologies
 - JavaScript
