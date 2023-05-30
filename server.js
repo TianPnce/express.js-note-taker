@@ -1,50 +1,50 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const noteData = require('./Develop/db/db.json');
-
-const { v4: uuidv4 } = require('uuid');
-
-const PORT = process.env.PORT || 3001;
+const fs = require("fs");
+const express = require("express");
+const path = require("path");
 
 const app = express();
 
+const PORT = process.env.PORT || 3001;
+
 app.use(express.static('public'));
-app.use(express.urlencoded({extended : true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get('/', (req, res) =>
-  res.sendFile(path.join(__dirname, 'index.html'))
-)
+app.get("/notes", (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/notes.html"));
+});
 
-app.get('/notes', (req, res) => 
-  res.sendFile(path.join(__dirname, 'notes.html'))
-);
+app.get("/api/notes", (req, res) => {
+    res.sendFile(path.join(__dirname, "/db/db.json"));
+});
 
-app.get('*', (req, res) => 
- res.sendFile(path.join(__dirname,'index.html'))
-)
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/index.html"));
+});
 
-app.get('./api/notes', (req, res) => {
-  fs.readFile('./Develop/db/db.json', (err, data) => {
-    if (err){
-      console.log(err);
-    }else {
-      const noteData = JSON.parse(data);
-      noteData.push(newNote);
-      writeFile('./Develop/db/db.json',noteData)
-    }
-  })
+app.post("/api/notes", (req, res) => {
+    let newNote = req.body;
+    let noteList = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
+    let notelength = (noteList.length).toString();
+
+    newNote.id = notelength;
+    noteList.push(newNote);
+
+    fs.writeFileSync("./db/db.json", JSON.stringify(noteList));
+    res.json(noteList);
 })
 
-app.post('./api/notes', (req, res) => {
-  const newNote = req.body
-  newNote.id = uuidv4()
-  noteData.push(newNote)
-  fs.writeFile('./Develop/db/db.json', JSON.stringify(noteData))
-  res.json(noteData)
-})
+app.delete("/api/notes/:id", (req, res) => {
+    let noteList = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
+    let noteId = (req.params.id).toString();
+    noteList = noteList.filter(selected =>{
+        return selected.id != noteId;
+    })
+    fs.writeFileSync("./db/db.json", JSON.stringify(noteList));
+    res.json(noteList);
+});
+
 
 app.listen(PORT, () =>
-  console.log(`App listening at http://localhost:${PORT} 🚀`)
-)
+ console.log(`App listening at http://localhost:${PORT}`)
+ );
